@@ -1,0 +1,187 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Filbert by differentmatt</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/differentmatt/filbert">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/differentmatt/filbert/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/differentmatt/filbert/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Filbert</h1>
+          <p>JavaScript parser of Python</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/differentmatt">differentmatt</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h1>
+<a name="filbert" class="anchor" href="#filbert"><span class="octicon octicon-link"></span></a>Filbert</h1>
+
+<p>JavaScript-based Python parser.  Outputs an abstract syntax tree as specified by the
+<a href="https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API">Mozilla Parser API</a>.</p>
+
+<p>This parser is a work in progress, adapted from the JavaScript parser <a href="https://github.com/marijnh/acorn">Acorn</a>.</p>
+
+<h2>
+<a name="want-to-contribute" class="anchor" href="#want-to-contribute"><span class="octicon octicon-link"></span></a>Want to contribute?</h2>
+
+<p>Great!  Feel free to <a href="https://help.github.com/articles/using-pull-requests">submit a pull request</a>, file some <a href="https://github.com/differentmatt/filbert/issues">GitHub issues</a>, or <a href="mailto:mattlott@gmail.com">email Matt</a></p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<div class="highlight highlight-sh"><pre>npm install filbert
+</pre></div>
+
+<h2>
+<a name="components" class="anchor" href="#components"><span class="octicon octicon-link"></span></a>Components</h2>
+
+<p>When run in a CommonJS (node.js) or AMD environment, exported values
+appear in the interfaces exposed by the individual files, as usual.
+When loaded in the browser without any kind of module management, a
+single global object <code>filbert</code> will be defined, and all the exported
+properties will be added to that.</p>
+
+<h3>
+<a name="filbertjs" class="anchor" href="#filbertjs"><span class="octicon octicon-link"></span></a>filbert.js</h3>
+
+<p>This file contains the actual parser (and is what you get when you
+<code>require("filbert")</code> in node.js).</p>
+
+<p><strong>parse</strong><code>(input, options)</code> is used to parse a Python program.
+The <code>input</code> parameter is a string, <code>options</code> can be undefined or an
+object setting some of the options listed below. The return value will
+be an abstract syntax tree object as specified by the
+<a href="https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API">Mozilla Parser API</a>.</p>
+
+<p>When  encountering   a  syntax   error,  the   parser  will   raise  a
+<code>SyntaxError</code> object with a meaningful  message. The error object will
+have a <code>pos</code> property that indicates the character offset at which the
+error occurred,  and a <code>loc</code>  object that contains a  <code>{line, column}</code>
+object referring to that same position.</p>
+
+<ul>
+<li><p><strong>locations</strong>: When <code>true</code>, each node has a <code>loc</code> object attached
+with <code>start</code> and <code>end</code> subobjects, each of which contains the
+one-based line and zero-based column numbers in <code>{line, column}</code>
+form. Default is <code>false</code>.</p></li>
+<li><p><strong>ranges</strong>: To add a <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=745678">semi-standardized</a> "range" property holding a
+<code>[start, end]</code> array with the same numbers, set the <code>ranges</code> option
+to <code>true</code>.</p></li>
+</ul><p><strong>pythonRuntime</strong> holds an object required to execute JavaScript code that
+has been generated from the output AST.  (e.g. the builtin len() function
+is not native to JavaScript).  This object must be available if the AST output from
+parse will be used to generate and execute JavaScript code.</p>
+
+<p><strong>runtimeParamName</strong> name of the python runtime object that will be referenced
+in the output AST. (e.g. if set to '__pythonRuntime', AST nodes will have
+references to a '__pythonRuntime' object).</p>
+
+<p><strong>tokenize</strong><code>(input, options)</code> exports a primitive interface to
+Filbert's tokenizer. The function takes an input string and options
+similar to <code>parse</code>, and returns a function that can be called repeatedly
+to read a single token, and returns a <code>{start, end, type, value}</code> object 
+(with added <code>startLoc</code> and <code>endLoc</code> properties when the <code>locations</code> option 
+is enabled). This object will be reused (updated) for each token, so you
+can't count on it staying stable.</p>
+
+<p><strong>tokTypes</strong> holds an object mapping names to the token type objects
+that end up in the <code>type</code> properties of tokens.</p>
+
+<h3>
+<a name="filbert_loosejs" class="anchor" href="#filbert_loosejs"><span class="octicon octicon-link"></span></a>filbert_loose.js</h3>
+
+<p>This file implements an error-tolerant parser. It exposes a single
+function.</p>
+
+<p><strong>parse_dammit</strong><code>(input, options)</code> takes the same arguments and
+returns the same syntax tree as the <code>parse</code> function in <code>filbert.js</code>,
+but never raises an error, and will do its best to parse syntactically
+invalid code in as meaningful a way as it can. It'll insert identifier
+nodes with name <code>"✖"</code> as placeholders in places where it can't make
+sense of the input. Depends on <code>filbert.js</code>, because it uses the same
+tokenizer.</p>
+
+<h2>
+<a name="language-support" class="anchor" href="#language-support"><span class="octicon octicon-link"></span></a>Language Support</h2>
+
+<p>Python3 is the target language.  Much of it is working, and the remaining pieces are outlined below.</p>
+
+<h3>
+<a name="supported" class="anchor" href="#supported"><span class="octicon octicon-link"></span></a>Supported</h3>
+
+<p>Keywords:</p>
+
+<blockquote>
+<p>False None True and break class continue def elif else for if in is not or pass return while</p>
+</blockquote>
+
+<p>Built-ins:</p>
+
+<blockquote>
+<p>abs() all() any() bool() chr() dict() enumerate() filter() float() hex() int() len() list() map() max() min() oct() ord() pow() print() range() repr() reversed() round() sorted() str() sum() tuple()</p>
+</blockquote>
+
+<h3>
+<a name="coming-soon" class="anchor" href="#coming-soon"><span class="octicon octicon-link"></span></a>Coming Soon!</h3>
+
+<p>Keywords:</p>
+
+<blockquote>
+<p>as assert del except finally from import global lambda nonlocal raise try with yield</p>
+</blockquote>
+
+<p>Built-ins:</p>
+
+<blockquote>
+<p>ascii() bin() bytearray() bytes() callable() classmethod() compile() complex() delattr() dir() divmod() eval() exec() format() frozenset() getattr() globals() hasattr() hash() help() id() input() isinstance() issubclass() iter() locals() memoryview() next() object() open() property() set() setattr() slice() staticmethod() super() type() vars() zip() __import__() </p>
+</blockquote>
+
+<p>Advanced features:</p>
+
+<ul>
+<li>Sequence operations</li>
+<li>List comprehensions</li>
+<li>Regular expressions</li>
+<li>Slices</li>
+</ul><h2>
+<a name="testing" class="anchor" href="#testing"><span class="octicon octicon-link"></span></a>Testing</h2>
+
+<div class="highlight highlight-sh"><pre>grunt <span class="nb">test</span>
+</pre></div>
+
+<h2>
+<a name="get-in-touch" class="anchor" href="#get-in-touch"><span class="octicon octicon-link"></span></a>Get in touch</h2>
+
+<p>Please use the <a href="https://github.com/differentmatt/filbert/issues">GitHub issues</a>, or <a href="mailto:mattlott@gmail.com">email Matt</a></p>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
